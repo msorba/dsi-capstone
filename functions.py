@@ -122,3 +122,19 @@ def threshold_image(img,threshold_val=140):
     out = thresh * timg
     img = Image.fromarray(out)
     return img
+
+def count_spokes(image_wrinkle_class):
+    polar_img_wrinkle=polar_coord(image_wrinkle_class)
+    edges = cv2.Canny(polar_img_wrinkle,40,70) 
+    lines = cv2.HoughLinesP(image=edges,rho=1,theta=np.pi/180, threshold=150, minLineLength=200,maxLineGap=30)
+    count = 0
+    if lines is None:
+        return 0
+    else:
+        for line in lines:
+            coords=line[0]
+            slope=(coords[3]-coords[1])/(coords[2]-coords[0])
+            if slope > -0.2 and slope <0.2:
+                cv2.line(polar_img_wrinkle,(coords[0],coords[1]),(coords[2],coords[3]),[255,255,255],3)
+                count += 1
+    return count
