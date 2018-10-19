@@ -82,12 +82,14 @@ def get_classes(img, resize=128,n_clusters=7):
     size = (resize, resize)
     img_resize  = img.resize(size, Image.ANTIALIAS)#resize
     img_array_resize=np.asarray(img_resize)
-    X  = np.reshape(img_array_resize, (-1, 3))
-    km = KMeans(n_clusters=7, random_state=0)
+    w,h,d = tuple(img_array_resize.shape)
+    X  = np.reshape(img_array_resize, (w*h,d))
+    km = KMeans(n_clusters=n_clusters, random_state=0)
     km.fit(X)
     
     img_array=np.asarray(img)
-    labels=km.predict(np.reshape(img_array, (-1, 3)))
+    w,h,d = tuple(img_array.shape)
+    labels=km.predict(np.reshape(img_array, (w*h, d)))
     classes = np.reshape(labels, img_array.shape[:2]) 
     classes = np.multiply(classes, 255.0/np.max(classes)) # Normalize
     return(labels,classes)
@@ -96,14 +98,27 @@ def get_classes(img, resize=128,n_clusters=7):
 def get_wrinkle_class(img,resize=128,n_clusters=7):
     labels=get_classes(img,resize=resize,n_clusters=n_clusters)[0]
     img_array=np.asarray(img)
-    X  = np.reshape(img_array, (-1, 3))
-    df = pd.DataFrame(X, columns=['red', 'green', 'blue'])
+    w,h,d = tuple(img_array.shape)
+    X  = np.reshape(img_array, (w*h,d))
+    df = pd.DataFrame(X, columns=['red', 'green', 'blue','a'])
     df_mean = df.astype('int').groupby(labels).mean()
+
     # Find most red class
-    df_mean['red_diff'] = (np.divide(df_mean['red'], df_mean['green']) +  
-                           np.divide(df_mean['red'], df_mean['blue'])) / 2.0
+#     df_mean['red_diff'] = (np.divide(df_mean['red'], df_mean['green']) +  
+#                            np.divide(df_mean['red'], df_mean['blue'])) / 2.0
+    df_mean['red_diff'] = df_mean['red'] - df_mean['green'] - df_mean['blue']
     wrinkle_id     = np.argmax(df_mean['red_diff'])
     wrinkle_labels = [1 if i == wrinkle_id else 0 for i in labels]
     wrinkle_classes = np.reshape(wrinkle_labels, img_array.shape[:2]) 
     wrinkle_classes = np.multiply(wrinkle_classes, 255.0/np.max(wrinkle_classes))
     return(wrinkle_labels,wrinkle_classes)
+
+def threshold_image(img,threshold_val=140):
+    """
+    only keeps pixel values over "threshold_val". This helps tremendously in finding the wrinkles, and allows us to choose smaller n_cluster
+    """
+    timg = np.asarray(img)
+    thresh = timg > threshold_val
+    out = thresh * timg
+    img = Image.fromarray(out)
+    return img
