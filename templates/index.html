@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Sightengine demo - Python and Flask</title>
+  <link rel= "stylesheet" type= "text/css" href= "{{ url_for('static',filename='styles/app.css') }}">
+</head>
+
+<body>
+<header class="navbar">
+  <form action="/upload" method="post" enctype="multipart/form-data" >
+      <span class="btn btn-default btn-file">
+        Browse <input type="file" name="image">
+      </span>
+
+    <input type="submit" value="Upload your image" class="btn btn-primary">
+
+  </form>
+  <form action="/results">
+    <input type="submit" value="Get Results!" />
+</form>
+
+</header>
+  <p> Notes: Currently, the algorithm in place will look for "spokes" in the image to determine whether it is "phz" or "not phz". Any image that is not phz will show up as WT. Therefore, this classifier currently will only work with Day 4 or Day 5 images where the structure is clear. All images earlier than Day 4 will show up as WT. We are considering ways to handle this more elgantly.  </p>
+	<img src="{{ display_image }}" alt="Display Image">
+</body>
+</html>

@@ -5,6 +5,7 @@ import cv2
 from PIL import Image
 from sklearn.cluster import KMeans
 import matplotlib.pyplot as plt
+import pylab
 
 
 basepath = "Images"
@@ -98,9 +99,10 @@ def get_classes(img, resize=128,n_clusters=7):
 def get_wrinkle_class(img,resize=128,n_clusters=7):
     labels=get_classes(img,resize=resize,n_clusters=n_clusters)[0]
     img_array=np.asarray(img)
+    img_array = img_array[:,:,:3]
     w,h,d = tuple(img_array.shape)
     X  = np.reshape(img_array, (w*h,d))
-    df = pd.DataFrame(X, columns=['red', 'green', 'blue','a'])
+    df = pd.DataFrame(X, columns=['red', 'green', 'blue'])
     df_mean = df.astype('int').groupby(labels).mean()
 
     # Find most red class
@@ -138,3 +140,7 @@ def count_spokes(image_wrinkle_class):
                 cv2.line(polar_img_wrinkle,(coords[0],coords[1]),(coords[2],coords[3]),[255,255,255],3)
                 count += 1
     return count
+def plot_wrinkle_class(img_wrinkle_class):
+    plt.figure(num=None, figsize=(10, 10), dpi=80, facecolor='w', edgecolor='k')
+    plt.imshow(img_wrinkle_class)
+    pylab.savefig('static/results/wrinkle.png',bbox_inches='tight')
