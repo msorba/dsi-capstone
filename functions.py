@@ -78,11 +78,20 @@ def polar_coord(X):
 
 
 # This function takes as input an image, computes kmeans and outputs the labels and the image 'colored' by the classes.
-def get_classes(img, resize=128,n_clusters=7):
+def get_classes(img, resize=128, n_clusters=7, movie=False):
     
-    size = (resize, resize)
-    img_resize  = img.resize(size, Image.ANTIALIAS)#resize
-    img_array_resize=np.asarray(img_resize)
+    # Resize
+    if not movie:
+    	size             = (resize, resize)
+    	img_resize       = img.resize(size, Image.ANTIALIAS)#resize
+    	img_array_resize = np.asarray(img_resize)
+    else:
+    	reduce_factor    = 4
+        size             = tuple(np.divide(img.shape[:2], reduce_factor).astype(int)) + (3,)
+        img_array_resize = np.resize(img, size)
+
+    	
+    # Reshape
     w,h,d = tuple(img_array_resize.shape)
     X  = np.reshape(img_array_resize, (w*h,d))
     km = KMeans(n_clusters=n_clusters, random_state=0)
@@ -94,6 +103,7 @@ def get_classes(img, resize=128,n_clusters=7):
     classes = np.reshape(labels, img_array.shape[:2]) 
     classes = np.multiply(classes, 255.0/np.max(classes)) # Normalize
     return(labels,classes)
+
 
 # This function takes an image as input and outputs the image 'colored' by the wrinkle class.
 def get_wrinkle_class(img,resize=128,n_clusters=7):
@@ -140,7 +150,13 @@ def count_spokes(image_wrinkle_class):
                 cv2.line(polar_img_wrinkle,(coords[0],coords[1]),(coords[2],coords[3]),[255,255,255],3)
                 count += 1
     return count
-def plot_wrinkle_class(img_wrinkle_class):
+def plot_wrinkle_class(img_wrinkle_class, save=True):
     plt.figure(num=None, figsize=(10, 10), dpi=80, facecolor='w', edgecolor='k')
     plt.imshow(img_wrinkle_class)
-    pylab.savefig('static/results/wrinkle.png',bbox_inches='tight')
+
+    if save:
+	    pylab.savefig('static/results/wrinkle.png',bbox_inches='tight')
+
+
+
+
