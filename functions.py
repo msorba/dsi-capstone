@@ -82,11 +82,11 @@ def get_classes(img, resize=128, n_clusters=7, movie=False):
     
     # Resize
     if not movie:
-    	size             = (resize, resize)
-    	img_resize       = img.resize(size, Image.ANTIALIAS)#resize
-    	img_array_resize = np.asarray(img_resize)
+        size             = (resize, resize)
+        img_resize       = img.resize(size, Image.ANTIALIAS)#resize
+        img_array_resize = np.asarray(img_resize)
     else:
-    	reduce_factor    = 4
+        reduce_factor    = 4
         size             = tuple(np.divide(img.shape[:2], reduce_factor).astype(int)) + (3,)
         img_array_resize = np.resize(img, size)
 
@@ -155,7 +155,7 @@ def plot_wrinkle_class(img_wrinkle_class, save=True):
     plt.imshow(img_wrinkle_class)
 
     if save:
-	    pylab.savefig('static/results/wrinkle.png',bbox_inches='tight')
+        pylab.savefig('static/results/wrinkle.png',bbox_inches='tight')
 
 
 
