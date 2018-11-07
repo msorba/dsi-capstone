@@ -89,6 +89,7 @@ def cartesian_coord(X):
     X_cartesian = X_cartesian.astype(np.uint8)
     return(X_cartesian)
 
+
 def threshold_image(img,threshold_val=50):
     """
     only keeps pixel values over "threshold_val". This helps tremendously in finding the wrinkles, and allows us to choose smaller n_cluster
@@ -195,5 +196,6 @@ def plot_wrinkle_class(img_wrinkle_class, save=True):
         pylab.savefig('static/results/wrinkle.png',bbox_inches='tight')
 
 
-
+def perc_wrinkled(wrinkle_labels):
+    return round(100*wrinkle_labels.count(1)/len(wrinkle_labels),2)
 
