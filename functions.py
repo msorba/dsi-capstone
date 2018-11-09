@@ -111,16 +111,16 @@ def get_classes(img, resize=128, n_clusters=3, movie=False,threshold_val=50):
     """
     # convert into image if is array
     try:
-        img=Image.fromarray(img, 'RGB')
+        img = Image.fromarray(img, 'RGB')
     except:
         pass
     
     # keeps pixels above threshold
-    img=threshold_image(img,threshold_val)
+    img = threshold_image(img,threshold_val)
     
     # Resize
     if not movie:
-        size=(resize,resize)
+        size=(resize, resize)
         img_resize       = img.resize(size, Image.ANTIALIAS)#resize
         img_array_resize = np.asarray(img_resize)
     else:
@@ -131,37 +131,56 @@ def get_classes(img, resize=128, n_clusters=3, movie=False,threshold_val=50):
     	
     # Reshape
     w,h,d = tuple(img_array_resize.shape)
-    X  = np.reshape(img_array_resize, (w*h,d))
-    km = KMeans(n_clusters=n_clusters, random_state=0)
+    X     = np.reshape(img_array_resize, (w*h,d))
+
+    # Add position variables
+    # y_axis = np.array([])
+    # for i in np.arange(128):
+    # 	y_axis = np.append(y_axis, np.arange(128))
+
+    # y_axis = np.reshape(y_axis, (128 * 128, 1))
+    # x_axis = np.reshape(np.repeat(np.arange(128), 128), (128*128, 1))
+    # X      = np.append(X, x_axis, axis=1)
+    # X      = np.append(X, y_axis, axis=1)
+
+	# Fit model
+    km    = KMeans(n_clusters=n_clusters, random_state=0)
     km.fit(X)
     
-    img_array=np.asarray(img)
-    w,h,d = tuple(img_array.shape)
-    labels=km.predict(np.reshape(img_array, (w*h, d)))
-    classes = np.reshape(labels, img_array.shape[:2]) 
-    classes = np.multiply(classes, 255.0/np.max(classes)) # Normalize
+    # Determine labels and classes
+    img_array = np.asarray(img)
+    w,h,d     = tuple(img_array.shape)
+    labels    = km.labels_ #km.predict(np.reshape(img_array, (w*h, d)))
+    classes   = np.reshape(labels, img_array.shape[:2]) 
+    classes   = np.multiply(classes, 255.0 / np.max(classes)) # Normalize
     return(labels,classes)
 
 
 # This function takes an image as input and outputs the image 'colored' by the wrinkle class.
-def get_wrinkle_class(img,resize=128,n_clusters=3,threshold_val=50):
-    labels=get_classes(img,resize=resize,n_clusters=n_clusters,threshold_val=140)[0]
-    img_array=np.asarray(img)
-    img_array = img_array[:,:,:3]
-    w,h,d = tuple(img_array.shape)
-    X  = np.reshape(img_array, (w*h,d))
-    df = pd.DataFrame(X, columns=['red', 'green', 'blue'])
-    df_mean = df.astype('int').groupby(labels).mean()
+def get_wrinkle_class(img, resize=128,n_clusters=3, threshold_val=100):
+	labels    = get_classes(img, resize=128, n_clusters=3, movie=False, threshold_val=threshold_val)[0]
+	img_array = np.asarray(img)
+	img_array = img_array[:,:,:3]
+	w,h,d     = tuple(img_array.shape)
+	X         = np.reshape(img_array, (w*h,d))
+	df        = pd.DataFrame(X, columns=['red', 'green', 'blue'])
+	df_mean   = df.astype('int').groupby(labels).mean()
 
-    # Find most red class
-#     df_mean['red_diff'] = (np.divide(df_mean['red'], df_mean['green']) +  
-#                            np.divide(df_mean['red'], df_mean['blue'])) / 2.0
-    df_mean['red_diff'] = df_mean['red'] - df_mean['green'] - df_mean['blue']
-    wrinkle_id     = np.argmax(df_mean['red_diff'])
-    wrinkle_labels = [1 if i == wrinkle_id else 0 for i in labels]
-    wrinkle_classes = np.reshape(wrinkle_labels, img_array.shape[:2]) 
-    wrinkle_classes = np.multiply(wrinkle_classes, 255.0/np.max(wrinkle_classes))
-    return(wrinkle_labels,wrinkle_classes)
+	# Find most red class
+	# df_mean['red_diff'] = (np.divide(df_mean['red'], df_mean['green']) +  
+	#                        np.divide(df_mean['red'], df_mean['blue'])) / 2.0
+	# df_mean['red_diff'] = df_mean['red'] - df_mean['green'] - df_mean['blue']
+	# wrinkle_id     = np.argmax(df_mean['red_diff'])
+
+	df_mean['most_red'] = (np.abs(df_mean['red'] - 90) +  np.abs(df_mean['red'] - 50) + np.abs(df_mean['blue'] - 50))
+	wrinkle_id          = np.argmin(df_mean['most_red'])
+	wrinkle_labels      = [1 if i == wrinkle_id else 0 for i in labels]
+
+	# Plot
+	wrinkle_classes     = np.reshape(wrinkle_labels, img_array.shape[:2]) 
+	wrinkle_classes     = np.multiply(wrinkle_classes, 255.0/np.max(wrinkle_classes))
+
+	return(wrinkle_labels,wrinkle_classes)
 
 
 
