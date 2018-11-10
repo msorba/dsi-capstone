@@ -102,7 +102,7 @@ def threshold_image(img,threshold_val=50):
 
 
 # This function takes as input an image, computes kmeans and outputs the labels and the image 'colored' by the classes.
-def get_classes(img, resize=128, n_clusters=3, movie=False,threshold_val=50):
+def get_classes(img, resize=128, n_clusters=6, movie=False,threshold_val=100):
     
     """
     img: initial image
@@ -150,15 +150,15 @@ def get_classes(img, resize=128, n_clusters=3, movie=False,threshold_val=50):
     # Determine labels and classes
     img_array = np.asarray(img)
     w,h,d     = tuple(img_array.shape)
-    labels    = km.labels_ #km.predict(np.reshape(img_array, (w*h, d)))
+    labels=km.predict(np.reshape(img_array, (w*h, d)))
     classes   = np.reshape(labels, img_array.shape[:2]) 
     classes   = np.multiply(classes, 255.0 / np.max(classes)) # Normalize
     return(labels,classes)
 
 
 # This function takes an image as input and outputs the image 'colored' by the wrinkle class.
-def get_wrinkle_class(img, resize=128,n_clusters=3, threshold_val=100):
-	labels    = get_classes(img, resize=128, n_clusters=3, movie=False, threshold_val=threshold_val)[0]
+def get_wrinkle_class(img, resize=128,n_clusters=6, threshold_val=100):
+	labels    = get_classes(img, resize=resize, n_clusters=n_clusters, movie=False, threshold_val=threshold_val)[0]
 	img_array = np.asarray(img)
 	img_array = img_array[:,:,:3]
 	w,h,d     = tuple(img_array.shape)
@@ -167,13 +167,13 @@ def get_wrinkle_class(img, resize=128,n_clusters=3, threshold_val=100):
 	df_mean   = df.astype('int').groupby(labels).mean()
 
 	# Find most red class
-	# df_mean['red_diff'] = (np.divide(df_mean['red'], df_mean['green']) +  
-	#                        np.divide(df_mean['red'], df_mean['blue'])) / 2.0
-	# df_mean['red_diff'] = df_mean['red'] - df_mean['green'] - df_mean['blue']
-	# wrinkle_id     = np.argmax(df_mean['red_diff'])
+# 	df_mean['red_diff'] = (np.divide(df_mean['red'], df_mean['green']) +  
+# 	                       np.divide(df_mean['red'], df_mean['blue'])) / 2.0
+	df_mean['red_diff'] = df_mean['red'] - df_mean['green'] - df_mean['blue']
+	wrinkle_id     = np.argmax(df_mean['red_diff'])
 
-	df_mean['most_red'] = (np.abs(df_mean['red'] - 90) +  np.abs(df_mean['red'] - 50) + np.abs(df_mean['blue'] - 50))
-	wrinkle_id          = np.argmin(df_mean['most_red'])
+# 	df_mean['most_red'] = (np.abs(df_mean['red'] - 90) +  np.abs(df_mean['red'] - 50) + np.abs(df_mean['blue'] - 50))
+# 	wrinkle_id          = np.argmin(df_mean['most_red'])
 	wrinkle_labels      = [1 if i == wrinkle_id else 0 for i in labels]
 
 	# Plot
@@ -184,15 +184,18 @@ def get_wrinkle_class(img, resize=128,n_clusters=3, threshold_val=100):
 
 
 
-def detect_lines(img,rho=1,theta=np.pi/180,threshold=150,minLineLength=200,maxLineGap=30):
+def detect_lines(img,rho=1,theta=np.pi/180,threshold=150,minLineLength=5,maxLineGap=1):
     """
     input img
     
     returns: the initial images with the lines, the number of lines
     """
     polar_img_wrinkle=polar_coord(get_wrinkle_class(img)[1])
+    n_pixels=img.shape[0]+img.shape[1]
     edges = cv2.Canny(polar_img_wrinkle,40,70) 
-    lines = cv2.HoughLinesP(edges,rho=rho,theta=theta, threshold=threshold, minLineLength=minLineLength,maxLineGap=maxLineGap)
+    edges=cv2.dilate(edges,cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (2, 2)))
+    plt.imshow(edges)
+    lines = cv2.HoughLinesP(edges,rho=rho,theta=theta, threshold=threshold, minLineLength=int(minLineLength*n_pixels/100),maxLineGap=int(maxLineGap*n_pixels/100))
     count = 0
     if lines is None:
         return(img,0)
@@ -202,7 +205,7 @@ def detect_lines(img,rho=1,theta=np.pi/180,threshold=150,minLineLength=200,maxLi
             coords=line[0]
             slope=(coords[3]-coords[1])/(coords[2]-coords[0])
             if slope > -0.2 and slope <0.2:
-                cv2.line(img_return,(coords[0],coords[1]),(coords[2],coords[3]),[255,255,255],3)
+                cv2.line(img_return,(coords[0],coords[1]),(coords[2],coords[3]),[250,250,250],int(n_pixels/500))
                 count += 1
     img_return=cartesian_coord(img_return)
     return(img_return,count)
@@ -215,6 +218,7 @@ def plot_wrinkle_class(img_wrinkle_class, save=True):
         pylab.savefig('static/results/wrinkle.png',bbox_inches='tight')
 
 
-def perc_wrinkled(wrinkle_labels):
-    return round(100*wrinkle_labels.count(1)/len(wrinkle_labels),2)
+def perc_wrinkled(img):
+    wrinkle_labels,wrinkle_classes=get_wrinkle_class(img)
+    return round(100*sum(np.array(wrinkle_labels)==1)/len(wrinkle_labels),2)
 
