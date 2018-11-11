@@ -222,3 +222,32 @@ def perc_wrinkled(img):
     wrinkle_labels,wrinkle_classes=get_wrinkle_class(img)
     return round(100*sum(np.array(wrinkle_labels)==1)/len(wrinkle_labels),2)
 
+
+def detect_lines_cy(img, rho=1, theta=np.pi / 180, threshold=150, minLineLength=5, maxLineGap=1):
+    """
+    input img
+
+    returns: image with lines and lines
+    """
+    polar_img_wrinkle = polar_coord(get_wrinkle_class(img)[1])
+    n_pixels = img.shape[0] + img.shape[1]
+    edges = cv2.Canny(polar_img_wrinkle, 40, 70)
+    edges = cv2.dilate(edges, cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (2, 2)))
+    lines = cv2.HoughLinesP(edges, rho=rho, theta=theta, threshold=threshold,
+                            minLineLength=int(minLineLength * n_pixels / 100),
+                            maxLineGap=int(maxLineGap * n_pixels / 100))
+    pol_lines = []
+    if lines is None:
+        return None, []
+    else:
+        img_return = polar_coord(img)
+        for line in lines:
+            coords = line[0]
+            slope = (coords[3] - coords[1]) / (coords[2] - coords[0])
+            if slope > -0.2 and slope < 0.2:
+                cv2.line(img_return, (coords[0], coords[1]), (coords[2], coords[3]), [250, 250, 250],
+                         int(n_pixels / 500))
+                pol_lines.append(line)
+    img_return = cartesian_coord(img_return)
+    return (img_return, pol_lines)
+
