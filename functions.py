@@ -101,8 +101,87 @@ def threshold_image(img,threshold_val=50):
     return img
 
 
-# This function takes as input an image, computes kmeans and outputs the labels and the image 'colored' by the classes.
+## Newest version of get_classes function. This function takes as input an image, computes kmeans and outputs the labels and the image 'colored' by the classes.
 def get_classes(img, resize=128, n_clusters=6, movie=False,threshold_val=100):
+    
+    """
+    img: initial image
+
+    returns: the labels of the pixels and the image colored by the classes
+    """
+    # convert into image if is array
+    try:
+        img = Image.fromarray(img, 'RGB')
+    except:
+        pass
+    
+    # keeps pixels above threshold
+    img = threshold_image(img, threshold_val)
+    
+    # Resize
+    if not movie:
+        size=(resize, resize)
+        img_resize       = img.resize(size, Image.ANTIALIAS)#resize
+        img_array_resize = np.asarray(img_resize)
+    else:
+        reduce_factor    = 4
+        size             = tuple(np.divide(img.shape[:2], reduce_factor).astype(int)) + (3,)
+        img_array_resize = np.resize(img, size)
+
+
+    # Reshape
+    w,h,d = tuple(img_array_resize.shape)
+    X     = np.reshape(img_array_resize, (w*h,d))
+
+    # Add differences and ratios to red as features
+#     a = X[:,0] / (X[:,0] + X[:,2])
+#     a[np.isnan(a)] = 0
+#     a = np.reshape(a, (resize**2, 1))
+#     X = np.append(X, a, axis=1)
+
+#     b = X[:,0] / (X[:,0] + X[:,1])
+#     b[np.isnan(b)] = 0
+#     b = np.reshape(b, (resize**2, 1))
+#     X = np.append(X, b, axis=1)
+    
+#     c = X[:,0] - X[:,1] + X[:,2]
+#     c[np.isnan(c)] = 0
+#     c = np.reshape(c, (resize**2, 1))
+#     X = np.append(X, c, axis=1)
+    
+    # Add radial distance as feature
+    y_axis = np.array([])
+    for i in np.arange(resize):
+        y_axis = np.append(y_axis, np.arange(resize))
+        
+    y_axis          = np.reshape(y_axis, (resize**2, 1))
+    x_axis          = np.reshape(np.repeat(np.arange(resize), resize), (resize**2, 1))
+    radial_distance = np.sqrt(np.abs(x_axis - (resize / 2))**2 + np.abs(y_axis - (resize / 2))**2)
+    X               = np.append(X, radial_distance, axis=1)
+
+    # Remove blue and green
+#     X = X[:,[0, 3, 4, 5]]
+#     X = X[:,3:]
+
+    
+    # Fit model
+#     km    = KMeans(n_clusters=n_clusters, random_state=0).fit(X)
+#     km = AgglomerativeClustering(n_clusters=n_clusters).fit(X)
+    
+    # Determine labels and classes
+    img_array = np.asarray(img)
+    w,h,d     = tuple(img_array.shape)
+    labels    = [((X[:,0] > 100) * 1) & np.abs((1 - (X[:,1] / X[:,2])) < 0.75)
+                & (X[:,1] < 80) & (X[:,2] < 80) & ((X[:,0]/ (X[:,1] + X[:,2])) > 1.0)] #km.labels_ #km.predict(np.reshape(img_array, (w*h, d)))el
+    classes   = np.reshape(labels, size) 
+    classes   = np.multiply(classes, 255.0 / np.max(classes)) # Normalize
+    
+    return(labels,classes)
+
+
+
+# This function is depracated and should not be used. 
+def get_classes_old(img, resize=128, n_clusters=6, movie=False,threshold_val=100):
     
     """
     img: initial image
