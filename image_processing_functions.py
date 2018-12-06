@@ -72,7 +72,7 @@ def load_images(file_list_or_directory,size=(1000,1000)):
 
 def polar_coord(X):
     """
-    X: image (array format) having cartesian polarity
+    X: image (array format) having cartesian coordinates
 
     returns: the initial image transformed into polar coordinates 
     """
@@ -84,6 +84,11 @@ def polar_coord(X):
 
 # This function transforms polar coordinates to cartesian. X is the image (has to be array)
 def cartesian_coord(X):
+    """
+    X: image (array format) 
+
+    returns: the initial image transformed into cartesian coordinates 
+    """
     r = np.sqrt(((X.shape[0]/2.0)**2.0)+((X.shape[1]/2.0)**2.0)) #get radius
     X_cartesian=cv2.linearPolar(X, (X.shape[0]/2, X.shape[1]/2),r, cv2.WARP_INVERSE_MAP)
     X_cartesian = X_cartesian.astype(np.uint8)
@@ -92,7 +97,13 @@ def cartesian_coord(X):
 
 def threshold_image(img,threshold_val=50):
     """
-    only keeps pixel values over "threshold_val". This helps tremendously in finding the wrinkles, and allows us to choose smaller n_cluster
+    
+    img : initial image
+    threshold_val : the threshold for pixels to keep
+    
+    returns: 
+    img wthat only contains pixel values over "threshold_val".
+    This helps tremendously in finding the wrinkles, and allows us to choose smaller n_cluster
     """
     timg = np.asarray(img)
     thresh = timg > threshold_val
@@ -237,6 +248,12 @@ def get_classes_old(img, resize=128, n_clusters=6, movie=False,threshold_val=100
 
 # This function takes an image as input and outputs the image 'colored' by the wrinkle class.
 def get_wrinkle_class(img, resize=128,n_clusters=6, threshold_val=100):
+    
+    """
+    img: initial image
+
+    returns : intial images colorded by the wrinkle class with its label 
+    """
 	labels    = get_classes(img, resize=resize, n_clusters=n_clusters, movie=False, threshold_val=threshold_val)[0]
 	img_array = np.asarray(img)
 	img_array = img_array[:,:,:3]
@@ -272,7 +289,7 @@ def detect_lines(img,rho=1,theta=np.pi/180,threshold=150,minLineLength=5,maxLine
     polar_img_wrinkle=polar_coord(get_wrinkle_class(img)[1])
     n_pixels=img.shape[0]+img.shape[1]
     edges = cv2.Canny(polar_img_wrinkle,40,70) 
-    edges=cv2.dilate(edges,cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (2, 2)))
+    edges = cv2.dilate(edges,cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (2, 2)))
     plt.imshow(edges)
     lines = cv2.HoughLinesP(edges,rho=rho,theta=theta, threshold=threshold, minLineLength=int(minLineLength*n_pixels/100),maxLineGap=int(maxLineGap*n_pixels/100))
     count = 0
@@ -286,10 +303,15 @@ def detect_lines(img,rho=1,theta=np.pi/180,threshold=150,minLineLength=5,maxLine
             if slope > -0.2 and slope <0.2:
                 cv2.line(img_return,(coords[0],coords[1]),(coords[2],coords[3]),[250,250,250],int(n_pixels/500))
                 count += 1
-    img_return=cartesian_coord(img_return)
+    img_return = cartesian_coord(img_return)
     return(img_return,count)
 
 def plot_wrinkle_class(img_wrinkle_class, save=True):
+    """
+    input : wrinkle class img
+    
+    returns: plots the wrinkle class img and saves it if save = True
+    """
     plt.figure(num=None, figsize=(10, 10), dpi=80, facecolor='w', edgecolor='k')
     plt.imshow(img_wrinkle_class)
 
@@ -298,6 +320,12 @@ def plot_wrinkle_class(img_wrinkle_class, save=True):
 
 
 def perc_wrinkled(img):
+    
+    """
+    input : initial img
+    
+    returns: the percent of the surface of the biofilm covered by wrinkles
+    """
     wrinkle_labels,wrinkle_classes=get_wrinkle_class(img)
     return round(100*sum(np.array(wrinkle_labels)==1)/len(wrinkle_labels),2)
 
