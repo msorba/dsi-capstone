@@ -4,7 +4,6 @@ import pandas as pd
 from math import sqrt
 import cv2
 from PIL import Image
-from sklearn.cluster import KMeans
 import matplotlib.pyplot as plt
 import pylab
 
