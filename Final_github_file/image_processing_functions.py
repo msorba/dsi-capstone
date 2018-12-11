@@ -106,8 +106,7 @@ def perc_wrinkled(img, resize = 500, is_movie = False, is_red = True, background
     """
     wrinkle_labels, _ = get_wrinkles(img, resize = resize, is_movie = is_movie, is_red = is_red, 
                                      background_is_black = background_is_black)
-    return round(100*sum(np.array(wrinkle_labels) == 1) / (sum(np.array(wrinkle_labels) == 0) + sum(np.array(wrinkle_labels) == 
-                                                                                                   1)), 2)
+    return round(100*sum(np.array(wrinkle_labels) == 1) / (sum(np.array(wrinkle_labels) == 0) + sum(np.array(wrinkle_labels) == 1)), 2)
 
 
 
@@ -128,8 +127,8 @@ def detect_spokes(img, resize = 500, is_movie = False, is_red = True, rho = 1, t
         return(img, 0, 0)
     else:
         img_return = polar_coord(img)
-        medium_length = []
-        medium_dist_center = []
+        median_length = []
+        median_dist_center = []
         for line in lines:
             coords = line[0]
             slope = (coords[3]-coords[1])/(coords[2]-coords[0])
@@ -137,9 +136,9 @@ def detect_spokes(img, resize = 500, is_movie = False, is_red = True, rho = 1, t
             if slope > -0.2 and slope <0.2 and coords[0] > resize / 4 :
                 cv2.line(img_return,(coords[0],coords[1]),(coords[2],coords[3]),[250,250,250],int( resize / 200))
                 count += 1
-                medium_length.append(length)
-                medium_dist_center.append(min(coords[0], coords[3]))
+                median_length.append(length)
+                median_dist_center.append(min(coords[0], coords[3]))
     img_return = cartesian_coord(img_return)
-    medium_length = np.median(np.array(medium_length))
-    medium_dist_center = np.median(np.array(medium_dist_center))
-    return(img_return, count, medium_length, medium_dist_center)
+    median_length = np.median(np.array(median_length))
+    median_dist_center = np.median(np.array(median_dist_center))
+    return(img_return, count, median_length, median_dist_center)
