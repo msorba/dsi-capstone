@@ -124,7 +124,7 @@ def detect_spokes(img, resize = 500, is_movie = False, is_red = True, rho = 1, t
                             maxLineGap = int(maxLineGap * resize) / 100)
     count = 0
     if lines is None:
-        return(img, 0, 0)
+        return(img, 0, 0, 0)
     else:
         img_return = polar_coord(img)
         median_length = []
