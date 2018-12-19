@@ -37,7 +37,9 @@ Note to future developers: When running locally, you will likely have to debug s
 to run locally: 
 1. update the "app.secret_key" variable in app.py
 2. In this directory, open a terminal and run:
+
 $export FLASK_APP=app.py
+
 $flask run
 3. go to 127.0.0.1:5000 in your browser
 
