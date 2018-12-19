@@ -145,3 +145,4 @@ def detect_spokes(img, img_wrinkle = None, resize = 500, is_movie = False, is_re
     median_length = np.median(np.array(median_length))
     median_dist_center = np.median(np.array(median_dist_center))
     return(img_return, count, median_length, median_dist_center)
+
