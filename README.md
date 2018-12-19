@@ -41,6 +41,7 @@ to run locally:
 $export FLASK_APP=app.py
 
 $flask run
+
 3. go to 127.0.0.1:5000 in your browser
 
 questions about the Flask App can be sent to Ramy Jaber at rij2105@columbia.edu
