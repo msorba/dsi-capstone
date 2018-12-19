@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Sightengine demo - Python and Flask</title>
+  <link rel= "stylesheet" type= "text/css" href= "{{ url_for('static',filename='styles/app.css') }}">
+</head>
+
+<body>
+<header class="navbar">
+  <form action="/upload" method="post" enctype="multipart/form-data" >
+      <span class="btn btn-default btn-file">
+        Browse <input type="file" name="image">
+      </span>
+
+    <input type="submit" value="Upload your image" class="btn btn-primary">
+
+  </form>
+  <form action="/results">
+    <input type="submit" value="Get Results!" />
+</form>
+
+</header>
+  <p> Application Developed by Ramy Jaber, Marianne Sorba, Isaac Wainstein, Chuqi Yang</p>
+	<img src="{{ display_image }}" alt="Display Image">
+</body>
+</html>

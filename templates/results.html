@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1"  meta charset="UTF-8">
+
+<style>
+
+/* The container */
+.container {
+  display: block;
+  position: relative;
+  padding-left: 35px;
+  margin-bottom: 12px;
+  cursor: pointer;
+  font-size: 20px;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+
+/* Hide the browser's default checkbox */
+.container input {
+  position: absolute;
+  opacity: 0;
+  cursor: pointer;
+  height: 0;
+  width: 0;
+}
+
+/* Create a custom checkbox */
+.checkmark {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 25px;
+  width: 25px;
+  background-color: #eee;
+}
+
+/* On mouse-over, add a grey background color */
+.container:hover input ~ .checkmark {
+  background-color: #ccc;
+}
+
+/* When the checkbox is checked, add a blue background */
+.container input:checked ~ .checkmark {
+  background-color: #2196F3;
+}
+
+/* Create the checkmark/indicator (hidden when not checked) */
+.checkmark:after {
+  content: "";
+  position: absolute;
+  display: none;
+}
+
+/* Show the checkmark when checked */
+.container input:checked ~ .checkmark:after {
+  display: block;
+}
+
+/* Style the checkmark/indicator */
+.container .checkmark:after {
+  left: 9px;
+  top: 5px;
+  width: 5px;
+  height: 10px;
+  border: solid white;
+  border-width: 0 3px 3px 0;
+  -webkit-transform: rotate(45deg);
+  -ms-transform: rotate(45deg);
+  transform: rotate(45deg);
+}
+
+
+.slidecontainer {
+  width: 30%;
+}
+
+.slider {
+  -webkit-appearance: none;
+  width: 30%;
+  height: 25px;
+  background: #d3d3d3;
+  outline: none;
+  opacity: 0.7;
+  -webkit-transition: .2s;
+  transition: opacity .2s;
+}
+
+.slider:hover {
+  opacity: 1;
+}
+
+.slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 25px;
+  height: 25px;
+  background: #4CAF50;
+  cursor: pointer;
+}
+
+.slider::-moz-range-thumb {
+  width: 25px;
+  height: 25px;
+  background: #4CAF50;
+  cursor: pointer;
+}
+</style>
+
+
+  <title>Sightengine demo - Python and Flask</title>
+  <link rel= "stylesheet" type= "text/css" href= "{{ url_for('static',filename='styles/app.css') }}">
+</head>
+
+<body>
+
+<form action="/">
+    <input type="submit" value="Go Back!" />
+</form>
+
+<form method="POST">
+	    <!-- Ambulance Slider -->
+    <div class="col-md-4">
+        <h4>Background slider</h4>
+        <p> Thi value sets the threshold for the color of the background. <br> all pixels with RGB values below this value will be marked as "not part of the biofilm" and appear yellow in the processed image below</p>
+    </div>
+    <div class="col-md-8">
+        <div class="""slidecontainer">
+                  <input type="range" min="0" max="255" value= {{bg}} class="slider" name="background" id="backgroundSlider">
+                  <br>
+                  <p>Value: <span id="bg"></span></p>
+        </div>
+    </div>
+
+    <script>
+		var slider0 = document.getElementById("backgroundSlider");
+		var output0 = document.getElementById("bg");
+		output0.innerHTML = slider0.value;
+
+		slider0.oninput = function() {
+		  output0.innerHTML = this.value;
+		}
+	</script>
+
+	<div class="col-md-8">
+		<label class="container" for="redCheck">Red Dye used
+			<input type="checkbox" name="redCheck" id="redCheck" onchange="show_hide(this)" value={{redCheck}}>
+			<p>Select this checkbox then press 'submit' if the biofilms were developed using a red dye. Since the original images used when developing this model were entirely of red biofilms, this setting is optimized for conditions similar to the taining set. </p>
+			<span class="checkmark"></span>
+		</label>
+	</div>
+
+
+	<script>
+
+            function show_hide(checkboxElem) {
+			  if (checkboxElem.checked) {
+		  	    document.getElementById("alphaDiv").style.display="None";
+                document.getElementById("betaDiv").style.display="None";
+                document.getElementById("redCheck").value = 1;
+
+			  } else {
+                document.getElementById("alphaDiv").style.display="inline";
+                document.getElementById("betaDiv").style.display="inline";
+                document.getElementById("redCheck").value = 0;
+			  }
+			}
+
+    </script>
+
+
+	<div id="alphaDiv" style="display: inline">
+	    <div class="col-md-4">
+	        <h4>Glare slider</h4>
+	    </div>
+	    <div class="col-md-8">
+	        <div class="""slidecontainer">
+	        		<p> The glare slider helps tune the pixel brightness threshold for pixels in the biofilm but not part of the structure. This controls the purple region in the processed image below. <br> If the average of RGB channels of each pixel is above this threshold, the pixel is marked as "not structure". i.e. The 'whitest' pixels are removed. default: 80 </p>
+	                <input type="range" min="0" max="255" value={{al}} class="slider" name="alpha" id="alphaSlider">
+	                <br>
+	                <p>Value: <span id="al"></span></p>
+	        </div>
+	    </div>
+	</div>
+    <script>
+		var slider1 = document.getElementById("alphaSlider");
+		var output1 = document.getElementById("al");
+		output1.innerHTML = slider1.value;
+
+		slider1.oninput = function() {
+		  output1.innerHTML = this.value;
+		}
+	</script>
+
+
+	<div id=betaDiv style="display: inline">
+	    <div class="col-md-4">
+	        <h4>Structure Boldness slider</h4>
+	    </div>
+	    <div class="col-md-8">
+	        <div class="""slidecontainer">
+	        		<p> The boldness slider tunes the pixel brightness threshold for pixels that contribute to the structure within the biofilm. This is the blue region in the processed image. <br> The max value of any RGB channel for each pixel is used. Default is 110. Good range usually between 100 and 115</p>
+	                <input type="range" min="0" max="255" value={{bt}} class="slider" name="beta" id="betaSlider">
+	                <br>
+	                <p>Value: <span id="bt"></span></p>
+	        </div>
+	    </div>
+	</div>
+	<div>
+		<input type="submit" value="submit">
+	</div>
+
+    <script>
+		var slider2 = document.getElementById("betaSlider");
+		var output2 = document.getElementById("bt");
+		output2.innerHTML = slider2.value;
+
+		slider2.oninput = function() {
+		  output2.innerHTML = this.value;
+		}
+	</script>
+
+    <script>
+    	var cbEl = document.getElementById('redCheck')
+    	function persist_checkbox(checkboxElem) {
+    		console.log(cbEl.value)
+    		if (cbEl.value == 1){
+    			checkboxElem.checked = true;
+    			document.getElementById("alphaDiv").style.display="None";
+                document.getElementById("betaDiv").style.display="None";
+    			console.log("changed to true");
+    		} else {
+    			checkboxElem.checked = false;
+                document.getElementById("alphaDiv").style.display="inline";
+                document.getElementById("betaDiv").style.display="inline";
+    			console.log("changed to false");
+    		}
+    	}
+    	window.onload=persist_checkbox(cbEl)
+    </script>
+</form>
+	<img src="{{display_wrinkle_image}}" alt="Wrinkle Image">
+	<img src="{{display_spoke_image}}" alt="Spokes Image">
+	<p> {{ message1 }} <br/> {{message2}}  <br/> {{ message3 }} <br/> {{message4}}</p>
+</body>
+</html>
+
