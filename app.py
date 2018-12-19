@@ -10,7 +10,7 @@ app = Flask(__name__)
 sess = Session()
 # Check Configuration section for more details
 SESSION_TYPE = 'filesystem'
-app.secret_key = 'supersecret1234'
+app.secret_key = '<insert_some_secret_key_here>'
 app.config['SESSION_TYPE'] = SESSION_TYPE
 
 
