@@ -1,7 +1,8 @@
 # Exploring the Structure in Images of Biofilms
 ## Capstone Project - Columbia University Data Science Institute
-### Contributors: Marianne Sorba, Isaac Wainstein, Chuqi Yang, Ramy Jaber
-### Biology Lab Sponsor: GSAS - Professor Lars Dietrich, Lisa Kahl, Hannah Dayton
+#### Contributors: Marianne Sorba, Isaac Wainstein, Chuqi Yang, Ramy Jaber
+#### Biology Lab Sponsor: GSAS - Professor Lars Dietrich, Lisa Kahl, Hannah Dayton
+
 
 ## In this Repo
 - Jupyter Notebooks to walk through the analysis completed. 
