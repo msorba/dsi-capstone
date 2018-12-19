@@ -32,8 +32,8 @@ def cartesian_coord(X):
     return(X_cartesian)
 
 
-def get_wrinkles(img, resize = 500, is_movie = False, is_red = True, background_is_black = True, threshold_val=100, alpha=80, 
-                 beta=100):
+def get_wrinkles(img, resize = 500, is_movie = False, is_red = True, background_is_black = True, alpha=80, 
+                 beta=100, mask=40):
     
     """
     img: initial image
@@ -87,7 +87,7 @@ def get_wrinkles(img, resize = 500, is_movie = False, is_red = True, background_
         
     # apply black mask to background    
     lower_black = np.array([0,0,0], dtype = "uint16")
-    upper_black = np.array([40,40,40], dtype = "uint16")
+    upper_black = np.array([mask,mask,mask], dtype = "uint16")
     black_mask = cv2.inRange(img_array_resize, lower_black, upper_black)
 
     
@@ -97,26 +97,29 @@ def get_wrinkles(img, resize = 500, is_movie = False, is_red = True, background_
     return(labels, classes)
 
 
-def perc_wrinkled(img, resize = 500, is_movie = False, is_red = True, background_is_black = True):
+def perc_wrinkled(wrinkle_labels):
     
     """
-    input : initial img
+    input : wrinkle_labels from the get_wrinkles method
     
     returns: the percent of the surface of the biofilm covered by wrinkles
     """
-    wrinkle_labels, _ = get_wrinkles(img, resize = resize, is_movie = is_movie, is_red = is_red, 
-                                     background_is_black = background_is_black)
     return round(100*sum(np.array(wrinkle_labels) == 1) / (sum(np.array(wrinkle_labels) == 0) + sum(np.array(wrinkle_labels) == 1)), 2)
 
 
 
-def detect_spokes(img, resize = 500, is_movie = False, is_red = True, rho = 1, theta = np.pi/180, minLineLength = 10, maxLineGap = 2 , threshold = 10):
+def detect_spokes(img, img_wrinkle = None, resize = 500, is_movie = False, is_red = True, rho = 1, theta = np.pi/180, minLineLength = 10, maxLineGap = 2 , threshold = 10):
     """
     input img
     
     returns: the initial images with the lines, the number of lines
     """
-    _, img_wrinkle = get_wrinkles(img, resize = resize, is_movie = is_movie, is_red = is_red, background_is_black = False)
+    img = np.array(img)
+
+    if type(img_wrinkle) == 'NoneType':
+        _, img_wrinkle = get_wrinkles(img, resize = resize, is_movie = is_movie, is_red = is_red, background_is_black = False)
+
+
     polar_img_wrinkle = polar_coord(img_wrinkle)
     edges = cv2.Canny(polar_img_wrinkle,0,1) 
     edges = cv2.dilate(edges,cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (2, 2)))
@@ -133,7 +136,7 @@ def detect_spokes(img, resize = 500, is_movie = False, is_red = True, rho = 1, t
             coords = line[0]
             slope = (coords[3]-coords[1])/(coords[2]-coords[0])
             length = sqrt((coords[3] - coords[1])**2 + (coords[2] - coords[0])**2)
-            if slope > -0.2 and slope <0.2 and coords[0] > resize / 4 :
+            if slope > -0.2 and slope <0.2 and coords[0] < resize / 2 and coords[0] > resize / 4 :
                 cv2.line(img_return,(coords[0],coords[1]),(coords[2],coords[3]),[250,250,250],int( resize / 200))
                 count += 1
                 median_length.append(length)
