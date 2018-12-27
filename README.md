@@ -10,7 +10,7 @@ In this Capstone project, a team of Data Science Masters students explore ways t
 
 ## In this Repo
 - Jupyter Notebooks to walk through the analysis completed. 
-- Copy of Flask Application - live version available at <href "dsicapstonegsas.pythonanywhere.com" />
+- Copy of Flask Application - live version available at [dsicapstonegsas.pythonanywhere.com](dsicapstonegsas.pythonanywhere.com)
 - archive: work performed throughout the project that did not make it into the final submissions
 
 ## Image Processing Tutorial
