@@ -3,10 +3,14 @@
 #### Contributors: Marianne Sorba, Isaac Wainstein, Chuqi Yang, Ramy Jaber
 #### Biology Lab Sponsor: GSAS - Professor Lars Dietrich, Lisa Kahl, Hannah Dayton
 
+## Project Description
+A biofilm is a community of bacteria encased in a scaffold that protects the microorganisms. Biofilm structures vary depending on the types of bacteria, the bacterial species and their genetic makeups, as well as external conditions. This project studies images of biofilms and attempts to quantify their structures and distinct morphologies. Quantifying the biofilm morphology has implications in diagnosing and treating bacterial infections.
+
+In this Capstone project, a team of Data Science Masters students explore ways to quantify these structures using image processing and supervised and unsupervised machine learning. 
 
 ## In this Repo
 - Jupyter Notebooks to walk through the analysis completed. 
-- Copy of Flask Application - live version available at dsicapstonegsas.pythonanywhere.com
+- Copy of Flask Application - live version available at <href "dsicapstonegsas.pythonanywhere.com" />
 - archive: work performed throughout the project that did not make it into the final submissions
 
 ## Image Processing Tutorial
